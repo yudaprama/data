@@ -1,0 +1,97 @@
+<h3><a id="A_generic_STATA_command_0"></a>A generic STATA command</h3>
+<pre><code class="language-stata">[by varlist:] command [varlist] [=<span class="hljs-built_in">exp</span>] [<span class="hljs-keyword">if</span> <span class="hljs-built_in">exp</span>] [in range] [weight] [<span class="hljs-keyword">using</span> filename] [,options]
+</code></pre>
+<p>STATA’s documentation and help menu use a convention where an actual command term is bolded, and some value that you would specify is given in italics.  Think of it as a form that says “Your name here.” Items in brackets are optional.</p>
+<p>Learning this structure will help you learn commands.  It looks daunting at first, but if you work from the inside out it’ll make more sense.  One thing to remember is that STATA is a language, and, like German, sentence order is important in STATA.</p>
+<p>The command is the basis of anything you enter in STATA.  Think of it as an imperative verb that tells STATA what to do with the data in its memory.  Examples of these that we have already seen are use, save, tabulate, list, summary.</p>
+<p>The varlist is one or more variables towards with the command will be directed.  The varlist comes directly after the command.</p>
+<p>The specification <code>[=exp]</code> (read: “equals expression”) is used with commands such as generate that specify that STATA should execute some function.  For example,<br>
+generate under50=0<br>
+generate heightcm=ht * 2.54</p>
+<p>Common arithmetic operators in STATA are: <code>+, -, *, /, ^</code></p>
+<h3><a id="Using_if_and_in_20"></a>Using if and in</h3>
+<p>if and in options are used to run the command on a subset of the data.  When used, if or in should be put in the command after the main part of the command (and before the comma and option).  A common mistake is to try to put if and in after the comma and options.</p>
+<h3><a id="Relational_Operators_24"></a>Relational Operators</h3>
+<p>The if option uses logical expressions which are created with the following relational operators:</p>
+<pre><code class="language-stata">== is equal to (double equal sign)
+~= not equal to (can also use !=)
+&gt;  is greater than
+&lt;  is less than
+&gt;= is greater than or equal to
+&lt;= is less than or equal to
+&amp;  specifies AND
+|  specifies OR
+~  specifies NOT
+</code></pre>
+<p>You can create simple logical expressions, such as</p>
+<pre><code class="language-stata">ht &lt; <span class="hljs-number">72</span> 
+</code></pre>
+<p>or more complex expressions such as</p>
+<pre><code class="language-stata">(ht &lt; <span class="hljs-number">72</span> &amp; sex==”M”) | (ht&lt;<span class="hljs-number">68</span> &amp; sex==”F”)
+</code></pre>
+<blockquote>
+<p>NOTE:<br>
+For complicated expressions it is good to use parentheses to make sure expressions are evaluated in the order that you want.<br>
+We have to put the M and F in quotes because sex is a string variable.<br>
+For relational operators we use ==, for arithmetic operators we use =</p>
+</blockquote>
+<h3><a id="Missing_values_in_logical_expressions_57"></a>Missing values in logical expressions</h3>
+<blockquote>
+<p><strong>It is important to consider missing values when using relational operators!</strong><br>
+STATA codes missing <em>numeric</em> values as a <code>.</code> which is equivalent to a very large number.<br>
+To indicate a missing <em>string</em> value in a logical expression use empty quotes.  (i.e. <code>sex==””</code>)</p>
+</blockquote>
+<p>Aside on missing values, starting with Version 8 of Stata, you can specify up to 27 different types of missing values. They are: <code>.</code>, <code>.a</code>, <code>.b</code>, … ,<code>.z</code>. (During data entry, you can use these to differentiate among Refused, Not Applicable, Don’t Know, and other possible reasons for missing values.) These are the largest values allowed by the data type, so you can use <code>&lt;.</code> to exclude all 27 missing values for a variable.</p>
+<h3><a id="The_in_option_65"></a>The <code>in</code> option</h3>
+<p>The in qualifier specifies a range of values for the command.  The in  option is based on the order of the variables in storage, and is sensitive to the way in which the data is sorted.</p>
+<p>Example</p>
+<pre><code class="language-stata"><span class="hljs-comment">// Read in the data</span>
+insheet <span class="hljs-keyword">using</span> toy_data.csv, clear
+
+<span class="hljs-comment">// Summarize height for males </span>
+summarize ht <span class="hljs-keyword">if</span> sex==”M”
+
+<span class="hljs-comment">// Determine what percentage of cases are female/male.</span>
+tabulate sex <span class="hljs-keyword">if</span> <span class="hljs-keyword">case</span>==<span class="hljs-number">1</span>
+
+<span class="hljs-comment">// Summarize age for individuals 66 inches or taller</span>
+summarize age <span class="hljs-keyword">if</span> ht &gt;=<span class="hljs-number">66</span> &amp; ht~=.
+
+<span class="hljs-comment">// Summarize age of the 5 shortest people</span>
+sort ht
+summarize age in <span class="hljs-number">1</span>/<span class="hljs-number">5</span>
+</code></pre>
+<h3><a id="Using_by_91"></a>Using <code>by:</code></h3>
+<p>The <code>by varlist:</code> option may be used with a number of commands. This option repeats the command groups of observations specified by the variable list.</p>
+<p>The dataset must be sorted before you can use the by command.  However, recent versions of STATA allow you to use <code>bysort</code> (abbreviated <code>bys</code>), which will both sort and subset the data.</p>
+<p>If you want to sort in descending (rather than ascending order) use the <code>gsort</code> command with a <code>–</code> in front of the variable.</p>
+<p>If you sort on a variable, STATA will <strong>jumble</strong> the observations within each level unless you use the <code>stable</code> option.</p>
+<h3><a id="Example_101"></a>Example</h3>
+<pre><code class="language-stata"><span class="hljs-comment">// Read in the data</span>
+insheet <span class="hljs-keyword">using</span> http:<span class="hljs-comment">//students.washington.edu/chutter/Intro_to_STATA/toy_data.csv, clear</span>
+
+<span class="hljs-comment">// Summarize height separately for males and females</span>
+sort sex 
+by sex: summarize ht
+
+<span class="hljs-comment">// Find the mean, median and 90th percentile of age for men and women separated by cases/control status</span>
+bys <span class="hljs-keyword">case</span>: tabstat age, stat(mean, p50, p90) by(sex)
+
+<span class="hljs-comment">// Sort height in descending order (from tallest to shortest)</span>
+gsort –ht
+<span class="hljs-built_in">list</span> ht
+
+<span class="hljs-comment">// Contrast the following:</span>
+sort ht
+<span class="hljs-built_in">list</span> <span class="hljs-keyword">if</span> sex==”M”
+sort sex
+<span class="hljs-built_in">list</span> <span class="hljs-keyword">if</span> sex==”M”
+
+sort ht
+<span class="hljs-built_in">list</span> <span class="hljs-keyword">if</span> sex==”M”
+sort sex, stable
+<span class="hljs-built_in">list</span> <span class="hljs-keyword">if</span> sex==”M”
+
+sort sex ht
+<span class="hljs-built_in">list</span> <span class="hljs-keyword">if</span> sex==”M”
+</code></pre>

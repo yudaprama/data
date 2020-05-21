@@ -1,0 +1,323 @@
+[{
+	"link": "http://www.cpc.unc.edu/research/tools/data_analysis/statatutorial/misc/precision",
+	"title": "Precision and data storage — UNC Carolina Population Center",
+	"content": {
+		"node": "root",
+		"element": "Root",
+		"style": "root",
+		"child": [{
+			"node": "element",
+			"element": "View",
+			"style": "div",
+			"child": [{
+				"node": "element",
+				"element": "Text",
+				"style": "p",
+				"child": [{
+					"node": "text",
+					"text": "Two precision issues come up repeatedly when using Stata (and other similar analysis packages). One is how decimal values are represented in the computer&apos;s memory. The other is how large an integer you can store in a given Stata data type."
+				}]
+			}, {
+				"node": "element",
+				"element": "Text",
+				"style": "h4",
+				"child": [{
+					"node": "text",
+					"text": "When 0.7 doesn&apos;t equal 0.7"
+				}]
+			}, {
+				"node": "element",
+				"element": "Text",
+				"style": "p",
+				"child": [{
+					"node": "text",
+					"text": "Computers use a binary (0&apos;s and 1&apos;s) system to store decimal numbers. This leads to some inaccuracy, since some decimal values can&apos;t be stored exactly in binary. Try this:"
+				}]
+			}, {
+				"node": "element",
+				"element": "Pre",
+				"style": "pre",
+				"child": [{
+					"node": "text",
+					"text": "clear all\nset obs 1\ngen x= 0.7\nlist\nlist if x == 0.7   // 0.7 doesn&apos;t equal 0.7\nbrowse\nlist if x == float(0.7)   // now they are equal\n"
+				}]
+			}, {
+				"node": "element",
+				"element": "Text",
+				"style": "p",
+				"child": [{
+					"node": "text",
+					"text": "You&apos;ll notice that the command "
+				}, {
+					"node": "element",
+					"element": "Text",
+					"style": "strong",
+					"child": [{
+						"node": "text",
+						"text": "list&#xA0; if x == 0.7"
+					}]
+				}, {
+					"node": "text",
+					"text": "results in nothing being listed! When you browse the data, you&apos;ll see that 0.7 is being stored as the value 0.69999999. Since that value isn&apos;t 0.7, your command to list x results in no matches."
+				}]
+			}, {
+				"node": "element",
+				"element": "Text",
+				"style": "p",
+				"child": [{
+					"node": "text",
+					"text": "The "
+				}, {
+					"node": "element",
+					"element": "Text",
+					"style": "strong",
+					"child": [{
+						"node": "text",
+						"text": "float"
+					}]
+				}, {
+					"node": "text",
+					"text": " function takes care of this problem - it rounds the value 0.69999999 to 0.7. Many decimal values are stored accurately in binary, for example 0.5, but many are not. Rather than trying to memorize which are and which are not, we suggest always using the float function."
+				}]
+			}, {
+				"node": "element",
+				"element": "Text",
+				"style": "h4",
+				"child": [{
+					"node": "text",
+					"text": "Big integers"
+				}]
+			}, {
+				"node": "element",
+				"element": "Text",
+				"style": "p",
+				"child": [{
+					"node": "text",
+					"text": "The other precision issue has to do with Stata&apos;s data types. Stata offers 3 data types for integers (byte, int, and long) and 2 for floating point (float and double). For character data, Stata offers data type string. If you type "
+				}, {
+					"node": "element",
+					"element": "Text",
+					"style": "strong",
+					"child": [{
+						"node": "text",
+						"text": "help data_types"
+					}]
+				}, {
+					"node": "text",
+					"text": "you&apos;ll see a table that lists the 5 numeric data types that Stata uses, and the string data type, along with the minimum and maximum values that can be stored in each data type, and the maximum value that can be stored precisely."
+				}]
+			}, {
+				"node": "element",
+				"element": "Text",
+				"style": "p",
+				"child": [{
+					"node": "element",
+					"element": "Text",
+					"style": "strong",
+					"child": [{
+						"node": "text",
+						"text": "Why data types?"
+					}]
+				}, {
+					"node": "text",
+					"text": "When Stata was first being developed, computers had very little random-access memory, and RAM was expensive. So, there was a benefit to storing values in as little memory as possible. While it would be convenient to create all variables with the highest precision available, which for numeric data is type double, this would waste a lot of memory. For example, a typical yes-no (1,2) variable can be stored accurately in a single byte, so storing it in type double would waste 7 bytes per observation. In a data file of survey results with thousands of variables and thousands of observations, this adds up many megabytes of wasted storage."
+				}]
+			}, {
+				"node": "element",
+				"element": "Text",
+				"style": "p",
+				"child": [{
+					"node": "text",
+					"text": "Now that computer memory is less expensive, we tend to pay less attention to it. But we need to pay attention when creating values in Stata that are relatively large. Typically, this occurs when the researcher decides to create a single numeric identifier out of multiple, nested identifying variables. In the Demographic and Health Survey data, one can often use three variables (the sampling cluster, the household identifier within the cluster, and the person identifier within the household) jointly to identify an individual respondent. For example:"
+				}]
+			}, {
+				"node": "element",
+				"element": "Pre",
+				"style": "pre",
+				"child": [{
+					"node": "text",
+					"text": "     duplicates report v001 v002 v003\n"
+				}]
+			}, {
+				"node": "element",
+				"element": "Text",
+				"style": "p",
+				"child": [{
+					"node": "text",
+					"text": "usually demonstrates that these 3 nested variables create a unique identifier (but not always - be sure to check). But, if you try to combine them into a single numeric variable, you may run into trouble:"
+				}]
+			}, {
+				"node": "element",
+				"element": "Pre",
+				"style": "pre",
+				"child": [{
+					"node": "text",
+					"text": "     gen id= (v001*1000000) + (v002*1000) + v003\n"
+				}]
+			}, {
+				"node": "element",
+				"element": "Text",
+				"style": "p",
+				"child": [{
+					"node": "text",
+					"text": "This example creates an 8- or 9-digit number, depending on the values of the cluster identifier v001. But Stata will store id "
+				}, {
+					"node": "element",
+					"element": "Text",
+					"style": "strong",
+					"child": [{
+						"node": "text",
+						"text": "by default in type float"
+					}]
+				}, {
+					"node": "text",
+					"text": ". Data type float begins to lose precision above 7 digits. We might be lucky and create a unique identifier, but probably not."
+				}]
+			}, {
+				"node": "element",
+				"element": "Text",
+				"style": "p",
+				"child": [{
+					"node": "text",
+					"text": "There are two ways to get around this. First, specify "
+				}, {
+					"node": "element",
+					"element": "Text",
+					"style": "strong",
+					"child": [{
+						"node": "text",
+						"text": "double"
+					}]
+				}, {
+					"node": "text",
+					"text": " when generating large integers. Data type double can accurately represent integers up to 15 digits:"
+				}]
+			}, {
+				"node": "element",
+				"element": "Pre",
+				"style": "pre",
+				"child": [{
+					"node": "text",
+					"text": "     gen double id= (v001*1000000) + (v002*1000) + v003\n"
+				}]
+			}, {
+				"node": "element",
+				"element": "Text",
+				"style": "p",
+				"child": [{
+					"node": "text",
+					"text": "While double is discussed in the data type help page in terms of floating point precision, it works well for integers too, and it&apos;s the only way to store big integers precisely."
+				}]
+			}, {
+				"node": "element",
+				"element": "Text",
+				"style": "p",
+				"child": [{
+					"node": "text",
+					"text": "The other way to do this is using data type string for the identifier. In fact, the DHS data includes a string identifier, called caseid for the individual respondent. Strings are a bit of a pain to work with, but they precisely hold integers up to 244 characters in length."
+				}]
+			}, {
+				"node": "element",
+				"element": "Text",
+				"style": "p",
+				"child": [{
+					"node": "text",
+					"text": "We recommend that you always check for duplicates when creating a composite identifier. And always use "
+				}, {
+					"node": "element",
+					"element": "Text",
+					"style": "strong",
+					"child": [{
+						"node": "text",
+						"text": "data type double"
+					}]
+				}, {
+					"node": "text",
+					"text": " for these big integers. Some people even recommend that you always use data type double, which you can do with:"
+				}]
+			}, {
+				"node": "element",
+				"element": "Pre",
+				"style": "pre",
+				"child": [{
+					"node": "text",
+					"text": "     set type double, permanently\n"
+				}]
+			}, {
+				"node": "element",
+				"element": "Text",
+				"style": "p",
+				"child": [{
+					"node": "text",
+					"text": "This asks Stata to create all new variables with data type double, greatly reducing your need to worry about precision. When you&apos;re finished creating an analysis file, you can "
+				}, {
+					"node": "element",
+					"element": "Text",
+					"style": "strong",
+					"child": [{
+						"node": "text",
+						"text": "compress"
+					}]
+				}, {
+					"node": "text",
+					"text": "the file. This command asks Stata to decide how each variable can be stored most efficiently."
+				}]
+			}, {
+				"node": "element",
+				"element": "Text",
+				"style": "p",
+				"child": [{
+					"node": "text",
+					"text": "The Stata Corp. web site offers many FAQ&apos;s on topics like this. Here&apos;s one on the precision of floating point storage that you might find useful: "
+				}, {
+					"node": "element",
+					"element": "Text",
+					"style": "i",
+					"child": [{
+						"node": "text",
+						"text": "The accuracy of the float data type"
+					}]
+				}]
+			}, {
+				"node": "element",
+				"element": "Text",
+				"style": "p",
+				"child": [{
+					"node": "text",
+					"text": "Note: Dan Blanchette contributed this web page, however please direct questions to Phil Bardsley as noted below."
+				}]
+			}, {
+				"node": "element",
+				"element": "Text",
+				"style": "p",
+				"child": [{
+					"node": "text",
+					"text": "Review again?"
+				}]
+			}, {
+				"node": "element",
+				"element": "Text",
+				"style": "p",
+				"child": [{
+					"node": "text",
+					"text": "Another topic?"
+				}]
+			}]
+		}]
+	},
+	"theme": "light",
+	"fontFamily": "HelveticaNeue",
+	"fontSize": {
+		"pre": 12,
+		"p": 16,
+		"a": 16,
+		"code": 16,
+		"h6": 16,
+		"h5": 17,
+		"blockquote": 17,
+		"h4": 18,
+		"h3": 19,
+		"h2": 20,
+		"h1": 21
+	}
+}]
